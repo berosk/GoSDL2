@@ -17,10 +17,10 @@ func newSpaceObject(texture *sdl.Texture, body *chipmunk.Body, x, y int32) *spac
 	posVect := vect.Vect{vect.Float(x), vect.Float(y)}
 	otherVect := vect.Vect{vect.Float(0), vect.Float(0)}
 	shape := chipmunk.NewCircle(otherVect, float32(17))
-	shape.SetElasticity(.85)
-	shape.SetFriction(.5)
+	shape.SetElasticity(.5)
+	shape.SetFriction(1.0)
 	body.SetPosition(posVect)
-	body.SetVelocity(float32(randRange(-30, 30)), float32(randRange(-30, 30)))
+	body.SetVelocity(float32(randRange(-10, 10)), float32(randRange(-10, 10)))
 	body.SetAngularVelocity(float32(randRange(-50, 50)))
 	//shape.Body = body
 	body.AddShape(shape)
@@ -70,7 +70,7 @@ func main() {
 	srcRect := sdl.Rect{0, 0, 39, 39}
 
 	space := chipmunk.NewSpace()
-	space.Gravity = vect.Vect{0, 0}
+	space.Gravity = vect.Vect{0, -.10}
 	staticBody := chipmunk.NewBodyStatic()
 	space.AddBody(staticBody)
 
@@ -89,6 +89,8 @@ func main() {
 			case *sdl.QuitEvent:
 				fmt.Println(t)
 				running = false
+				//case *sdl.MouseMotionEvent:
+				//space.Gravity = vect.Vect{vect.Float(t.XRel), vect.Float(t.YRel)}
 			}
 		}
 
@@ -97,7 +99,8 @@ func main() {
 		for _, item := range spaceobs {
 			//fmt.Println(item)
 			item.update()
-			renderer.Copy(item.texture, &srcRect, item.destRect)
+			renderer.CopyEx(item.texture, &srcRect, item.destRect, float64(item.body.Angle()), &sdl.Point{X: 19, Y: 19}, sdl.FLIP_NONE)
+			//renderer.Copy(item.texture, &srcRect, item.destRect)
 		}
 		space.Step(vect.Float(1.0 / 60.0))
 		renderer.Present()
