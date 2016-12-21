@@ -15,22 +15,26 @@ func randRange(min, max int) int {
 func newSpaceObject(texture *sdl.Texture, body *chipmunk.Body, x, y int32) *spaceObject {
 
 	posVect := vect.Vect{vect.Float(x), vect.Float(y)}
-	shape := chipmunk.NewCircle(posVect, float32(19.5))
+	otherVect := vect.Vect{vect.Float(0), vect.Float(0)}
+	shape := chipmunk.NewCircle(otherVect, float32(17))
 	shape.SetElasticity(.85)
 	shape.SetFriction(.5)
 	body.SetPosition(posVect)
-	body.SetVelocity(float32(randRange(-10, 10)), float32(randRange(-10, 10)))
+	body.SetVelocity(float32(randRange(-30, 30)), float32(randRange(-30, 30)))
 	body.SetAngularVelocity(float32(randRange(-50, 50)))
+	//shape.Body = body
 	body.AddShape(shape)
 	return &spaceObject{
 		body:     body,
 		texture:  texture,
 		destRect: &sdl.Rect{x, y, 39, 39},
+		shape:    shape,
 	}
 }
 
 type spaceObject struct {
 	body     *chipmunk.Body
+	shape    *chipmunk.Shape
 	texture  *sdl.Texture
 	destRect *sdl.Rect
 }
@@ -41,7 +45,7 @@ func (s *spaceObject) update() {
 
 }
 
-const astcount int = 100
+const astcount int = 300
 
 func main() {
 
@@ -74,6 +78,7 @@ func main() {
 	for i := 0; i < astcount; i++ {
 		spaceobs = append(spaceobs, makeSprite(renderer))
 		space.AddBody(spaceobs[i].body)
+		//space.AddShape(spaceobs[i].shape)
 
 	}
 	running := true
