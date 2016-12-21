@@ -7,6 +7,7 @@ import (
 	"github.com/vova616/chipmunk"
 	"github.com/vova616/chipmunk/vect"
 	"math/rand"
+	"time"
 )
 
 func randRange(min, max int) int {
@@ -22,7 +23,6 @@ func newSpaceObject(texture *sdl.Texture, body *chipmunk.Body, x, y int32) *spac
 	body.SetPosition(posVect)
 	body.SetVelocity(float32(randRange(-10, 10)), float32(randRange(-10, 10)))
 	body.SetAngularVelocity(float32(randRange(-50, 50)))
-	//shape.Body = body
 	body.AddShape(shape)
 	return &spaceObject{
 		body:     body,
@@ -70,7 +70,7 @@ func main() {
 	srcRect := sdl.Rect{0, 0, 39, 39}
 
 	space := chipmunk.NewSpace()
-	space.Gravity = vect.Vect{0, -.10}
+	space.Gravity = vect.Vect{0, 0}
 	staticBody := chipmunk.NewBodyStatic()
 	space.AddBody(staticBody)
 
@@ -78,29 +78,34 @@ func main() {
 	for i := 0; i < astcount; i++ {
 		spaceobs = append(spaceobs, makeSprite(renderer))
 		space.AddBody(spaceobs[i].body)
-		//space.AddShape(spaceobs[i].shape)
 
 	}
+
+	timeNew := time.Now()
+	timeOld := time.Now()
+	var timeElapsed time.Duration
+
 	running := true
 	for running {
-
+		timeElapsed = timeNew.Sub(timeOld)
+		timeOld = timeNew
+		timeNew = time.Now()
+		fmt.Println("FPS: ", 1/timeElapsed.Seconds())
 		for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
 			switch t := event.(type) {
 			case *sdl.QuitEvent:
 				fmt.Println(t)
 				running = false
-				//case *sdl.MouseMotionEvent:
-				//space.Gravity = vect.Vect{vect.Float(t.XRel), vect.Float(t.YRel)}
+				//		case *sdl.MouseMotionEvent:
+				//			space.Gravity = vect.Vect{vect.Float(t.XRel) / 10, vect.Float(t.YRel) / 10}
 			}
 		}
 
 		renderer.Clear()
 		surface.FillRect(&windowRect, 0x00000000)
 		for _, item := range spaceobs {
-			//fmt.Println(item)
 			item.update()
 			renderer.CopyEx(item.texture, &srcRect, item.destRect, float64(item.body.Angle()), &sdl.Point{X: 19, Y: 19}, sdl.FLIP_NONE)
-			//renderer.Copy(item.texture, &srcRect, item.destRect)
 		}
 		space.Step(vect.Float(1.0 / 60.0))
 		renderer.Present()
