@@ -57,16 +57,16 @@ func main() {
 		panic(err)
 	}
 	defer window.Destroy()
-	surface, err := window.GetSurface()
+	//rendererType := uint32(sdl.RENDERER_SOFTWARE)
+	rendererType := uint32(sdl.RENDERER_ACCELERATED)
+	renderer, err := sdl.CreateRenderer(
+		window,
+		-1,
+		rendererType,
+	)
 	if err != nil {
 		panic(err)
 	}
-	renderer, err := sdl.CreateRenderer(window, -1, 0)
-	if err != nil {
-		panic(err)
-	}
-
-	windowRect := sdl.Rect{0, 0, 800, 600}
 	srcRect := sdl.Rect{0, 0, 39, 39}
 
 	space := chipmunk.NewSpace()
@@ -102,12 +102,12 @@ func main() {
 		}
 
 		renderer.Clear()
-		surface.FillRect(&windowRect, 0x00000000)
 		for _, item := range spaceobs {
 			item.update()
 			renderer.CopyEx(item.texture, &srcRect, item.destRect, float64(item.body.Angle()), &sdl.Point{X: 19, Y: 19}, sdl.FLIP_NONE)
 		}
 		space.Step(vect.Float(1.0 / 60.0))
+		window.UpdateSurface()
 		renderer.Present()
 	}
 }
